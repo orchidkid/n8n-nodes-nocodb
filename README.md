@@ -12,7 +12,6 @@ Custom n8n node for NocoDB. The node supports working with rows using the NocoDB
 
 - Create, update, delete, get and list table records
 - Count records with `where` filters and optional view
-- Upload attachments (base64 or binary input) into an attachment field
 
 ## Setup
 
