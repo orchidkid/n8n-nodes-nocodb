@@ -12,6 +12,10 @@ Just a **proper UI-driven experience**, the way it should’ve been from the sta
 
 ## 🤖 AI Tool node is supported
 
+- - -
+
+## Installation via Community Nodes
+
 - Go to settings => Community nodes
 - Click "Install"
 - Paste "n8n-nodes-nocodb-custom"
