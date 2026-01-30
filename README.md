@@ -18,8 +18,13 @@ Just a **proper UI-driven experience**, the way it should’ve been from the sta
 
 - - -
 
-## Installation
+## Installation via Community nodes
 
+- Go to Settings => Community nodes
+- Click "Install"
+- Paste the package name "n8n-nodes-nocodb-custom"
+- Install
+- Use it!
 - - -
 
 ## ✨ Supported Operations
