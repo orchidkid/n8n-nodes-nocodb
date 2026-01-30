@@ -10,6 +10,10 @@ Just a **proper UI-driven experience**, the way it should’ve been from the sta
 
 - - -
 
+## 🤖 AI Tool node is supported
+
+- - -
+
 ## ✨ Supported Operations
 
 *   **Create row**
@@ -23,7 +27,6 @@ Just a **proper UI-driven experience**, the way it should’ve been from the sta
 *   **List rows**
     
 *   **Count rows**
-    
 
 - - -
 
