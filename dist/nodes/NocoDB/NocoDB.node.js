@@ -135,12 +135,65 @@ function normalizeRecordPayload(fields, recordId, isUpdate) {
     }
     return payload;
 }
+async function loadLinkFieldIds(context, baseId, tableId) {
+    const pickLinks = (columns) => columns
+        .filter((c) => {
+        const t = c.uidt || c.type;
+        return t === "LinkToAnotherRecord" || t === "Links";
+    })
+        .map((c) => ({ id: c.id, title: c.title || c.column_name || c.id }));
+    const trySteps = [
+        `/api/v3/meta/bases/${baseId}/tables/${tableId}`,
+        `/api/v3/meta/tables/${tableId}`,
+        `/api/v1/db/meta/tables/${tableId}`,
+    ];
+    for (const endpoint of trySteps) {
+        try {
+            const response = await (0, utils_1.apiRequest)(context, "GET", endpoint);
+            const columns = response.fields || response.columns || [];
+            const links = pickLinks(columns);
+            if (links.length) {
+                console.log("NocoDB expandRelations meta ok", { endpoint, links });
+                return links;
+            }
+        }
+        catch (err) {
+            console.log("NocoDB expandRelations meta fail", { endpoint, err: err.message || err });
+        }
+    }
+    return [];
+}
+async function expandLinks(context, baseId, tableId, records, linkDefs) {
+    if (!linkDefs || !linkDefs.length || !records || !records.length)
+        return records;
+    for (const record of records) {
+        for (const link of linkDefs) {
+            const linkId = link.id || link;
+            try {
+                const res = await (0, utils_1.apiRequest)(context, "GET", `/api/v3/data/${baseId}/${tableId}/links/${linkId}/${record.id}`);
+                record.fields = record.fields || {};
+                const payload = res.records || res;
+                const titleKey = link.title || linkId;
+                // overwrite any scalar/count value that API may have returned
+                record.fields[titleKey] = payload;
+                // drop the technical key if it's different from title to avoid duplicates in final output
+                if (titleKey !== linkId && record.fields.hasOwnProperty(linkId)) {
+                    delete record.fields[linkId];
+                }
+            }
+            catch (_e) {
+                // ignore individual link errors
+            }
+        }
+    }
+    return records;
+}
 class NocoDB {
     constructor() {
         this.description = {
-            displayName: "NocoDB (SEO-SEN.py)",
+            displayName: "NocoDB (Seosen.py)",
             name: "nocodb",
-            icon: "file:seosenpy-nocodb-2.svg",
+            icon: "file:nocodb-node-logo.svg",
             group: ["input"],
             version: 1,
             subtitle: '={{$parameter["operation"]}}',
@@ -199,6 +252,31 @@ class NocoDB {
                         return [];
                     return (0, utils_1.loadFields)(this, tableId);
                 },
+                async getLinkFields() {
+                    const table = this.getNodeParameter("tableId", "");
+                    const tableId = (0, utils_1.resolveId)(table);
+                    if (!tableId)
+                        return [];
+                    // fetch columns so that value is id (needed for links API)
+                    let columns = [];
+                    try {
+                        const baseParam = this.getNodeParameter("baseId", 0);
+                        const baseId = (0, utils_1.resolveId)(baseParam);
+                        const response = await (0, utils_1.apiRequest)(this, "GET", `/api/v3/meta/bases/${baseId}/tables/${tableId}`);
+                        columns = response.fields || response.columns || [];
+                    }
+                    catch (error) {
+                        const response = await (0, utils_1.apiRequest)(this, "GET", `/api/v1/db/meta/tables/${tableId}`);
+                        columns = response.columns || [];
+                    }
+                    return columns
+                        .filter((c) => c.uidt === "LinkToAnotherRecord")
+                        .map((c) => ({
+                        name: c.title || c.column_name || c.id,
+                        value: c.id,
+                        description: c.uidt,
+                    }));
+                },
             },
         };
     }
@@ -250,17 +328,35 @@ class NocoDB {
                     if (operation === "get") {
                         const recordId = (0, utils_1.resolveId)(this.getNodeParameter("recordId", i));
                         const options = this.getNodeParameter("recordOptions", i, {});
+                        const expandAllRelations = this.getNodeParameter("recordOptions.expandRelations", i, false);
+                        let expandLinkIds = [];
                         const qs = {};
+                        if (expandAllRelations) {
+                            expandLinkIds = await loadLinkFieldIds(this, baseIdResolved, tableIdResolved);
+                            console.log("NocoDB expandRelations links", { baseId: baseIdResolved, tableId: tableIdResolved, expandLinkIds });
+                            if (expandLinkIds.length) {
+                                qs.include = expandLinkIds.map((l) => l.title || l.id).join(",");
+                            }
+                        }
                         if (options.fields && options.fields.length)
                             qs.fields = options.fields.join(",");
                         console.log("NocoDB get request", { baseId: baseIdResolved, tableId: tableIdResolved, recordId, qs });
                         const response = await (0, utils_1.apiRequest)(this, "GET", `/api/v3/data/${baseIdResolved}/${tableIdResolved}/records/${recordId}`, {}, qs);
-                        returnData.push(response);
+                        if (expandLinkIds && expandLinkIds.length) {
+                            const recs = Array.isArray(response.records) ? response.records : [response];
+                            await expandLinks(this, baseIdResolved, tableIdResolved, recs, expandLinkIds);
+                            returnData.push(...recs);
+                        }
+                        else {
+                            returnData.push(response);
+                        }
                     }
                     if (operation === "getAll") {
                         const returnAll = this.getNodeParameter("returnAll", i);
                         const limit = this.getNodeParameter("limit", i, 0);
                         const options = this.getNodeParameter("recordOptions", i, {});
+                        const expandAllRelations = this.getNodeParameter("recordOptions.expandRelations", i, false);
+                        let expandLinkIds = [];
                         const rawFilterGroups = this.getNodeParameter("filterGroups", i, {})?.groups
                             ? this.getNodeParameter("filterGroups", i, {})
                             : { groups: this.getNodeParameter("filterGroups.groups", i, []) };
@@ -272,6 +368,13 @@ class NocoDB {
                             }
                         }
                         const qsBase = {};
+                        if (expandAllRelations) {
+                            expandLinkIds = await loadLinkFieldIds(this, baseIdResolved, tableIdResolved);
+                            console.log("NocoDB expandRelations links", { baseId: baseIdResolved, tableId: tableIdResolved, expandLinkIds });
+                            if (expandLinkIds.length) {
+                                qsBase.include = expandLinkIds.map((l) => l.title || l.id).join(",");
+                            }
+                        }
                         if (options.fields && options.fields.length)
                             qsBase.fields = options.fields.join(",");
                         if (options.sort && options.sort.sortFields) {
@@ -299,13 +402,16 @@ class NocoDB {
                             limit,
                         });
                         let page = options.page || 1;
-                        const pageSize = options.pageSize || 25;
+                        const pageSize = options.pageSize || (returnAll ? 100 : Math.min(limit || 25, 1000));
                         let fetched = 0;
                         let hasMore = true;
                         while (hasMore) {
                             const qs = { ...qsBase, page, pageSize };
                             const response = await (0, utils_1.apiRequest)(this, "GET", `/api/v3/data/${baseIdResolved}/${tableIdResolved}/records`, {}, qs);
                             const records = response.records || [];
+                            if (expandLinkIds && expandLinkIds.length && records.length) {
+                                await expandLinks(this, baseIdResolved, tableIdResolved, records, expandLinkIds);
+                            }
                             returnData.push(...records);
                             fetched += records.length;
                             hasMore = !!response.next;

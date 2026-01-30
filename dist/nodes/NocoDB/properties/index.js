@@ -217,18 +217,18 @@ exports.nocodbNodeProperties = [
                 ],
             },
             {
+                displayName: "Expand Relations",
+                name: "expandRelations",
+                type: "boolean",
+                default: false,
+                description: "If enabled, all link fields are expanded and embedded into the response",
+            },
+            {
                 displayName: "Page",
                 name: "page",
                 type: "number",
                 default: 1,
                 typeOptions: { minValue: 1 },
-            },
-            {
-                displayName: "Page Size",
-                name: "pageSize",
-                type: "number",
-                default: 25,
-                typeOptions: { minValue: 1, maxValue: 1000 },
             },
         ],
     },
@@ -307,16 +307,6 @@ exports.nocodbNodeProperties = [
                     },
                 ],
             },
-        ],
-    },
-    {
-        displayName: "Count Options",
-        name: "countOptions",
-        type: "collection",
-        placeholder: "Add option",
-        default: {},
-        displayOptions: { show: { resource: ["row"], operation: ["count"] } },
-        options: [
         ],
     },
 ];

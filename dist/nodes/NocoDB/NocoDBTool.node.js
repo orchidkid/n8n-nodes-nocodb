@@ -132,9 +132,9 @@ function normalizeRecordPayload(fields, recordId, isUpdate) {
 class NocoDBTool {
     constructor() {
         this.description = {
-            displayName: "NocoDB Tool (SEO-SEN.py)",
+            displayName: "NocoDB Tool (Seosen.py)",
             name: "nocodbTool",
-            icon: "file:seosenpy-nocodb-2.svg",
+            icon: "file:nocodb-node-logo.svg",
             group: ["input"],
             version: 1,
             subtitle: '={{$parameter["operation"]}}',
