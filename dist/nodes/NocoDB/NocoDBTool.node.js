@@ -183,8 +183,8 @@ async function expandLinks(context, baseId, tableId, records, linkDefs) {
 class NocoDBTool {
     constructor() {
         this.description = {
-            displayName: "NocoDB (Seosen.py)",
-            name: "nocodbTool",
+            displayName: "NocoDB Tool (Custom)",
+            name: "nocodbToolCustom",
             icon: "file:nocodb-node-logo.svg",
             group: ["input"],
             version: 1,

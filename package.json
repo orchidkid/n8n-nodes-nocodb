@@ -1,41 +1,41 @@
 {
-  "name": "n8n-nodes-nocodb-custom",
-  "version": "0.1.63",
-  "description": "n8n community node for NocoDB (records, links, actions, attachments)",
-  "keywords": [
-    "n8n-community-node-package",
-    "nocodb",
-    "database",
-    "no-code"
-  ],
-  "license": "MIT",
-  "author": {
-    "name": "Custom integration scaffold"
-  },
-  "main": "dist/index.js",
-  "files": [
-    "dist"
-  ],
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "scripts": {
-    "build": "echo \"No build step required (precompiled JS in dist)\"",
-    "lint": "echo \"No lint configured\"",
-    "format": "echo \"No format configured\""
-  },
-  "peerDependencies": {
-    "n8n-core": "*",
-    "n8n-workflow": "*"
-  },
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "credentials": [
-      "dist/credentials/NocoDBApi.credentials.js"
-    ],
-    "nodes": [
-      "dist/nodes/NocoDB/NocoDB.node.js",
-      "dist/nodes/NocoDB/NocoDBTool.node.js"
-    ]
-  }
+    "name":  "n8n-nodes-nocodb-custom",
+    "version": "0.1.70",
+    "description":  "n8n community node for NocoDB (records, links, actions, attachments)",
+    "keywords":  [
+                     "n8n-community-node-package",
+                     "nocodb",
+                     "database",
+                     "no-code"
+                 ],
+    "license":  "MIT",
+    "author":  {
+                   "name":  "Custom integration scaffold"
+               },
+    "main":  "dist/index.js",
+    "files":  [
+                  "dist"
+              ],
+    "engines":  {
+                    "node":  "\u003e=18.0.0"
+                },
+    "scripts":  {
+                    "build":  "echo \"No build step required (precompiled JS in dist)\"",
+                    "lint":  "echo \"No lint configured\"",
+                    "format":  "echo \"No format configured\""
+                },
+    "peerDependencies":  {
+                             "n8n-core":  "*",
+                             "n8n-workflow":  "*"
+                         },
+    "n8n":  {
+                "n8nNodesApiVersion":  1,
+                "credentials":  [
+                                    "dist/credentials/NocoDBApi.credentials.js"
+                                ],
+                "nodes":  [
+                              "dist/nodes/NocoDB/NocoDB.node.js",
+                              "dist/nodes/NocoDB/NocoDBTool.node.js"
+                          ]
+            }
 }

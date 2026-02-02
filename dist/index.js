@@ -7,11 +7,11 @@ module.exports = {
 	],
 	nodes: [
 		{
-			name: 'NocoDB',
+			name: 'NocoDBCustom',
 			node: require('./nodes/NocoDB/NocoDB.node'),
 		},
 		{
-			name: 'NocoDBTool',
+			name: 'NocoDBToolCustom',
 			node: require('./nodes/NocoDB/NocoDBTool.node'),
 		},
 	],
