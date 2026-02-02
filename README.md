@@ -231,10 +231,6 @@ Perfect for large datasets and production workflows.
 *   Teams that value clean, maintainable workflows
     
 *   Developers who want their automations to scale
-    
-*   Prepare a **GitHub release description**
-    
-*   Or make a **README badge set** 😏
 
 ## 🤝 Need Custom Automation or Integration?
 
